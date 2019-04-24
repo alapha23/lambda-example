@@ -17,5 +17,22 @@ public class HelloLambda {
                 .withPayload(String.format("{\"address\":\"%s\", \"port\": %d}",
                         nettyServerTransport.getPublicAddress(), nettyServerTransport.getPort()));
 
+        awsLambda.invokeAsync(request);
+
+        final AmazonEC2 ec2 = AmazonEC2ClientBuilder.defaultClient();
+
+        DescribeAddressesResult response = ec2.describeAddresses();
+
+        for(Address address : response.getAddresses()) {
+            System.out.printf(
+                    "Found address with public IP %s, " +
+                            "domain %s, " +
+                            "allocation id %s " +
+                            "and NIC id %s",
+                    address.getPublicIp(),
+                    address.getDomain(),
+                    address.getAllocationId(),
+                    address.getNetworkInterfaceId());
+        }
     }
 }

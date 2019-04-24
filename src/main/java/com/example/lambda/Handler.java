@@ -16,7 +16,7 @@ public class Handler implements RequestHandler<Map<String, Object>, Context> {
     @Override
     public Context handleRequest(Map<String, Object> input, Context context) {
         LOG.info("received: " + input);
-        System.out.println("HELLO WORLD");
+        System.out.println("Code to be uploaded to lambda");
         return null;
 //        Response responseBody = new Response("Hello, the current time is " + new Date());
 //        Map<String, String> headers = new HashMap<>();

@@ -50,8 +50,8 @@ public final class NettyServerTransport {
     }
 
     this.port = setUpRandomPortNettyServer(serverBootstrap, tcpPortProvider);
-    //LOG.info("Public address: {}, localAddress: {}, port: {}", publicAddress, localAddress, port);
-    //LOG.info("Acceptor open: {}, active: {}", acceptor.isOpen(), acceptor.isActive());
+    LOG.info("Public address: {}, localAddress: {}, port: {}", publicAddress, localAddress, port);
+    LOG.info("Acceptor open: {}, active: {}", acceptor.isOpen(), acceptor.isActive());
   }
 
   public int getPort() {
@@ -75,12 +75,12 @@ public final class NettyServerTransport {
           final int p = portIterator.next();
           this.acceptor = serverBootstrap.bind(
             new InetSocketAddress(localAddress, p)).sync().channel();
-          //LOG.info("Server address: {}, Assigned server port = {}", localAddress, p);
+          LOG.info("Server address: {}, Assigned server port = {}", localAddress, p);
           return p;
         } catch (final Exception e) {
           e.printStackTrace();
-          //LOG.info("Server address: {}", localAddress);
-          //LOG.warn("Duplicate port is assigned to server... try again...");
+          LOG.info("Server address: {}", localAddress);
+          LOG.warn("Duplicate port is assigned to server... try again...");
         }
       }
     } catch (Exception e) {
