@@ -25,7 +25,7 @@ public class HelloLambda {
     public static void main(String arg[]) throws InjectionException {
 
         final JavaConfigurationBuilder jcb = Tang.Factory.getTang().newConfigurationBuilder();
-        jcb.bindNamedParameter(TcpPortRangeBegin.class, "1000");
+        jcb.bindNamedParameter(TcpPortRangeBegin.class, "5000");
 
         final Injector injector = Tang.Factory.getTang().newInjector(jcb.build());
         final TcpPortProvider tcpPortProvider = injector.getInstance(TcpPortProvider.class);
@@ -39,11 +39,13 @@ public class HelloLambda {
         AWSLambdaAsync awsLambda = AWSLambdaAsyncClientBuilder.standard().withClientConfiguration(
                 new ClientConfiguration().withMaxConnections(500)).build();
 
+        System.out.println("Create request");
         InvokeRequest request = new InvokeRequest()
                 .withFunctionName(AWSUtils.SIDEINPUT_LAMBDA_NAME2)
                 .withPayload(String.format("{\"address\":\"%s\", \"port\": %d}",
                         nettyServerTransport.getPublicAddress(), nettyServerTransport.getPort()));
 
+        System.out.println("Invoke request");
         awsLambda.invokeAsync(request);
 
     }
