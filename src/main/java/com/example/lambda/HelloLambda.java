@@ -4,10 +4,37 @@ import com.amazonaws.ClientConfiguration;
 import com.amazonaws.services.lambda.AWSLambdaAsync;
 import com.amazonaws.services.lambda.AWSLambdaAsyncClientBuilder;
 import com.amazonaws.services.lambda.model.InvokeRequest;
+import io.netty.channel.group.ChannelGroup;
+import io.netty.channel.group.DefaultChannelGroup;
+import io.netty.util.concurrent.GlobalEventExecutor;
+import org.apache.nemo.offloading.client.NettyServerSideChannelHandler;
+import org.apache.nemo.offloading.client.NettyServerTransport;
+import org.apache.nemo.offloading.client.OffloadingEventHandler;
+import org.apache.reef.tang.Injector;
+import org.apache.reef.tang.JavaConfigurationBuilder;
+import org.apache.reef.tang.Tang;
+import org.apache.reef.tang.exceptions.InjectionException;
+import org.apache.reef.wake.remote.ports.TcpPortProvider;
+import org.apache.reef.wake.remote.ports.parameters.TcpPortRangeBegin;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class HelloLambda {
-    public static void main(String arg[]){
-        //NettyServerTransport nettyServerTransport;
+    public static void main(String arg[]) throws InjectionException {
+
+        final JavaConfigurationBuilder jcb = Tang.Factory.getTang().newConfigurationBuilder();
+        jcb.bindNamedParameter(TcpPortRangeBegin.class, "1000");
+
+        final Injector injector = Tang.Factory.getTang().newInjector(jcb.build());
+        final TcpPortProvider tcpPortProvider = injector.getInstance(TcpPortProvider.class);
+        final ChannelGroup serverChannelGroup = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
+
+        final OffloadingEventHandler nemoEventHandler = null;
+
+        NettyServerTransport nettyServerTransport =  new NettyServerTransport(
+                tcpPortProvider, new NettyServerSideChannelHandler(serverChannelGroup, nemoEventHandler));;
 
         AWSLambdaAsync awsLambda = AWSLambdaAsyncClientBuilder.standard().withClientConfiguration(
                 new ClientConfiguration().withMaxConnections(500)).build();
@@ -19,20 +46,5 @@ public class HelloLambda {
 
         awsLambda.invokeAsync(request);
 
-        final AmazonEC2 ec2 = AmazonEC2ClientBuilder.defaultClient();
-
-        DescribeAddressesResult response = ec2.describeAddresses();
-
-        for(Address address : response.getAddresses()) {
-            System.out.printf(
-                    "Found address with public IP %s, " +
-                            "domain %s, " +
-                            "allocation id %s " +
-                            "and NIC id %s",
-                    address.getPublicIp(),
-                    address.getDomain(),
-                    address.getAllocationId(),
-                    address.getNetworkInterfaceId());
-        }
     }
 }
