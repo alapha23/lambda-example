@@ -47,6 +47,6 @@ public class HelloLambda {
 
         System.out.println("Invoke request");
         awsLambda.invokeAsync(request);
-
+        System.out.println("Blocking invoke request.");
     }
 }
